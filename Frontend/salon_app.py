@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import json
 
 # API Base URL
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = st.secrets.get("API_BASE_URL", "http://127.0.0.1:8000")
 
 @st.cache_data(show_spinner=False)
 def load_services_and_stylists():
