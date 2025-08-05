@@ -1,0 +1,445 @@
+# premium_components.py - Zusätzliche Premium Features für hoai.ch
+
+import streamlit as st
+import json
+from datetime import datetime, timedelta
+import plotly.graph_objects as go
+import pandas as pd
+
+# 1. ANIMATED WELCOME SCREEN
+def show_welcome_animation():
+    """Premium animated welcome screen with logo"""
+    st.markdown("""
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-content">
+            <div class="logo-animation">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" stroke="#D4AF37" stroke-width="2" fill="none" 
+                            stroke-dasharray="314" stroke-dashoffset="314">
+                        <animate attributeName="stroke-dashoffset" from="314" to="0" dur="2s" fill="freeze"/>
+                    </circle>
+                    <text x="60" y="70" text-anchor="middle" font-family="Playfair Display" 
+                          font-size="32" fill="#1a1a1a" opacity="0">
+                        hoai
+                        <animate attributeName="opacity" from="0" to="1" begin="0.5s" dur="1s" fill="freeze"/>
+                    </text>
+                </svg>
+            </div>
+            <h2 class="welcome-text">Willkommen im Premium Salon Experience</h2>
+        </div>
+    </div>
+    
+    <style>
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 242, 237, 0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 1s ease-out 2.5s forwards;
+        }
+        
+        .welcome-content {
+            text-align: center;
+        }
+        
+        .logo-animation {
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-text {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            color: #1a1a1a;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+    
+    <script>
+        setTimeout(() => {
+            document.getElementById('welcomeOverlay').style.display = 'none';
+        }, 3500);
+    </script>
+    """, unsafe_allow_html=True)
+
+# 2. SMART TIME SUGGESTIONS
+def get_smart_time_suggestions(service_type, day_of_week):
+    """AI-powered time suggestions based on service and day"""
+    suggestions = {
+        "Haarschnitt": {
+            "weekday": ["09:00", "12:00", "17:00"],
+            "weekend": ["10:00", "14:00", "16:00"]
+        },
+        "Färben": {
+            "weekday": ["09:00", "14:00"],
+            "weekend": ["10:00", "15:00"]
+        },
+        "Styling": {
+            "weekday": ["15:00", "17:00", "18:00"],
+            "weekend": ["11:00", "15:00", "17:00"]
+        }
+    }
+    
+    is_weekend = day_of_week >= 5
+    time_key = "weekend" if is_weekend else "weekday"
+    
+    return suggestions.get(service_type, {}).get(time_key, ["10:00", "14:00", "16:00"])
+
+# 3. APPOINTMENT CONFIRMATION EMAIL TEMPLATE
+def generate_confirmation_email(booking_details):
+    """Generate premium HTML email template"""
+    return f"""
+    <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #1a1a1a; padding: 40px; text-align: center;">
+            <h1 style="color: #D4AF37; margin: 0; font-size: 28px;">hoai.ch</h1>
+            <p style="color: #fff; margin-top: 10px;">Premium Salon Experience</p>
+        </div>
+        
+        <div style="padding: 40px; background: #fff;">
+            <h2 style="color: #1a1a1a; margin-bottom: 30px;">Terminbestätigung</h2>
+            
+            <div style="background: #F5F2ED; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                <p style="margin: 5px 0;"><strong>Service:</strong> {booking_details['service']}</p>
+                <p style="margin: 5px 0;"><strong>Stylist:</strong> {booking_details['stylist']}</p>
+                <p style="margin: 5px 0;"><strong>Datum:</strong> {booking_details['date']}</p>
+                <p style="margin: 5px 0;"><strong>Zeit:</strong> {booking_details['time']}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="#" style="background: #D4AF37; color: #1a1a1a; padding: 15px 30px; 
+                   text-decoration: none; border-radius: 30px; font-weight: bold;">
+                    Zum Kalender hinzufügen
+                </a>
+            </div>
+            
+            <p style="color: #6B6B6B; font-size: 14px;">
+                Bei Fragen erreichen Sie uns unter:<br>
+                📞 +41 XX XXX XX XX<br>
+                📧 info@hoai.ch
+            </p>
+        </div>
+        
+        <div style="background: #F5F2ED; padding: 20px; text-align: center;">
+            <p style="color: #6B6B6B; margin: 0; font-size: 12px;">
+                © 2024 hoai.ch - Premium Salon Experience
+            </p>
+        </div>
+    </div>
+    """
+
+# 4. ANALYTICS DASHBOARD
+def show_analytics_dashboard():
+    """Premium analytics dashboard for salon owner"""
+    st.markdown("### 📊 Analytics Dashboard")
+    
+    # Sample data for visualization
+    dates = pd.date_range(start='2024-08-01', periods=7)
+    bookings = [12, 15, 18, 14, 20, 22, 19]
+    
+    # Create premium chart
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(
+        x=dates,
+        y=bookings,
+        mode='lines+markers',
+        name='Buchungen',
+        line=dict(color='#D4AF37', width=3),
+        marker=dict(size=10, color='#1a1a1a'),
+        fill='tonexty',
+        fillcolor='rgba(212, 175, 55, 0.1)'
+    ))
+    
+    fig.update_layout(
+        title="Buchungen diese Woche",
+        xaxis_title="Datum",
+        yaxis_title="Anzahl Buchungen",
+        hovermode='x unified',
+        plot_bgcolor='#F5F2ED',
+        paper_bgcolor='white',
+        font=dict(family="Inter, sans-serif"),
+        showlegend=False,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Key metrics
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            label="Heutige Buchungen",
+            value="19",
+            delta="+3 vs. gestern"
+        )
+    
+    with col2:
+        st.metric(
+            label="Auslastung",
+            value="87%",
+            delta="+5%"
+        )
+    
+    with col3:
+        st.metric(
+            label="Ø Bewertung",
+            value="4.9 ⭐",
+            delta="+0.1"
+        )
+
+# 5. VOICE INPUT SUPPORT
+def add_voice_input():
+    """Add voice input capability"""
+    st.markdown("""
+    <div class="voice-input-container">
+        <button class="voice-button" onclick="startVoiceRecognition()">
+            🎤 Spracheingabe
+        </button>
+    </div>
+    
+    <script>
+        function startVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'de-DE';
+                recognition.start();
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    // Send to Streamlit
+                    window.parent.postMessage({
+                        type: 'voice_input',
+                        text: transcript
+                    }, '*');
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Voice recognition error:', event.error);
+                };
+            } else {
+                alert('Spracheingabe wird von Ihrem Browser nicht unterstützt.');
+            }
+        }
+    </script>
+    
+    <style>
+        .voice-input-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .voice-button {
+            background: #D4AF37;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .voice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 6. MULTI-LANGUAGE SUPPORT
+def get_translations(language="de"):
+    """Multi-language support for international clients"""
+    translations = {
+        "de": {
+            "welcome": "Willkommen bei hoai.ch",
+            "select_service": "Welchen Service möchten Sie buchen?",
+            "select_stylist": "Bei welchem Stylisten?",
+            "select_date": "Wählen Sie ein Datum",
+            "select_time": "Wählen Sie eine Zeit",
+            "confirm": "Termin bestätigen"
+        },
+        "en": {
+            "welcome": "Welcome to hoai.ch",
+            "select_service": "Which service would you like to book?",
+            "select_stylist": "Which stylist?",
+            "select_date": "Select a date",
+            "select_time": "Select a time",
+            "confirm": "Confirm appointment"
+        },
+        "fr": {
+            "welcome": "Bienvenue chez hoai.ch",
+            "select_service": "Quel service souhaitez-vous réserver?",
+            "select_stylist": "Quel styliste?",
+            "select_date": "Sélectionnez une date",
+            "select_time": "Sélectionnez une heure",
+            "confirm": "Confirmer le rendez-vous"
+        }
+    }
+    
+    return translations.get(language, translations["de"])
+
+# 7. PREMIUM NOTIFICATION SYSTEM
+def show_notification(message, type="info"):
+    """Show premium styled notifications"""
+    colors = {
+        "success": "#4CAF50",
+        "error": "#F44336",
+        "warning": "#FF9800",
+        "info": "#2196F3"
+    }
+    
+    st.markdown(f"""
+    <div class="notification {type}" style="
+        background: {colors.get(type, colors['info'])};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        margin: 20px 0;
+        animation: slideInRight 0.5s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    ">
+        <span style="font-size: 20px;">
+            {'✅' if type == 'success' else '❌' if type == 'error' else 'ℹ️'}
+        </span>
+        <span>{message}</span>
+    </div>
+    
+    <style>
+        @keyframes slideInRight {{
+            from {{
+                opacity: 0;
+                transform: translateX(100px);
+            }}
+            to {{
+                opacity: 1;
+                transform: translateX(0);
+            }}
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+# 8. BOOKING HISTORY
+def show_booking_history(client_id):
+    """Show client's booking history in premium format"""
+    # Sample booking history
+    history = [
+        {"date": "2024-07-15", "service": "Haarschnitt", "stylist": "Maria", "price": "CHF 85"},
+        {"date": "2024-06-20", "service": "Färben", "stylist": "Anna", "price": "CHF 150"},
+        {"date": "2024-05-10", "service": "Styling", "stylist": "Sophie", "price": "CHF 95"}
+    ]
+    
+    st.markdown("### 📅 Ihre Buchungshistorie")
+    
+    for booking in history:
+        st.markdown(f"""
+        <div style="
+            background: #F5F2ED;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        ">
+            <div>
+                <strong>{booking['service']}</strong> - {booking['stylist']}<br>
+                <small style="color: #6B6B6B;">{booking['date']}</small>
+            </div>
+            <div style="text-align: right;">
+                <strong>{booking['price']}</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# 9. PREMIUM ERROR HANDLING
+def handle_error_elegantly(error_type):
+    """Handle errors with style"""
+    error_messages = {
+        "api_down": {
+            "title": "Momentan nicht verfügbar",
+            "message": "Unser Buchungssystem wird gerade gewartet. Bitte versuchen Sie es in wenigen Minuten erneut.",
+            "icon": "🔧"
+        },
+        "no_availability": {
+            "title": "Keine verfügbaren Termine",
+            "message": "Leider sind alle Termine ausgebucht. Möchten Sie auf die Warteliste?",
+            "icon": "📅"
+        },
+        "network_error": {
+            "title": "Verbindungsproblem",
+            "message": "Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+            "icon": "🌐"
+        }
+    }
+    
+    error = error_messages.get(error_type, error_messages["network_error"])
+    
+    st.markdown(f"""
+    <div style="
+        background: white;
+        border: 2px solid #FF5252;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin: 20px 0;
+    ">
+        <div style="font-size: 48px; margin-bottom: 20px;">{error['icon']}</div>
+        <h3 style="color: #1a1a1a; margin-bottom: 10px;">{error['title']}</h3>
+        <p style="color: #6B6B6B;">{error['message']}</p>
+        <button style="
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            margin-top: 20px;
+            cursor: pointer;
+        ">
+            Erneut versuchen
+        </button>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 10. EXPORT FUNCTIONS
+def export_booking_to_calendar(booking_details):
+    """Generate .ics file for calendar import"""
+    from icalendar import Calendar, Event
+    from datetime import datetime
+    import pytz
+    
+    cal = Calendar()
+    event = Event()
+    
+    event.add('summary', f"{booking_details['service']} bei {booking_details['stylist']}")
+    event.add('dtstart', datetime.strptime(f"{booking_details['date']} {booking_details['time']}", "%Y-%m-%d %H:%M"))
+    event.add('dtend', datetime.strptime(f"{booking_details['date']} {booking_details['time']}", "%Y-%m-%d %H:%M") + timedelta(hours=1))
+    event.add('location', 'hoai.ch Salon, Zürich')
+    
+    cal.add_component(event)
+    
+    return cal.to_ical()

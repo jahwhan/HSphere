@@ -1,0 +1,22 @@
+{
+  "main_promptforge": {
+    "path": "Agents/main_promptforge.py",
+    "description": "Refines prompts for intelligent agent interaction.",
+    "status": "active"
+  },
+  "main_booking": {
+    "path": "Agents/main_booking.py",
+    "description": "Handles all booking logic and client scheduling.",
+    "status": "active"
+  },
+  "main_selfimprove": {
+    "path": "Agents/main_selfimprove.py",
+    "description": "Self-updates system logic based on feedback.",
+    "status": "active"
+  },
+  "main_inventory": {
+    "path": "Agents/main_inventory.py",
+    "description": "Tracks and manages product inventory data.",
+    "status": "active"
+  }
+}

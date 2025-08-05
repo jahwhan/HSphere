@@ -1,0 +1,7 @@
+{
+    "main_booking": "Handles both local and Phorest-based bookings, choosing logic based on context or availability.",
+  "main_inventory.py": "Tracks and manages product inventory data.",
+  "main_promptforge.py": "Refines prompts for intelligent agent interaction.",
+  "main_selfimprove.py": "Self-updates system logic based on feedback."
+}
+

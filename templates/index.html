@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HOAI Booking</title>
+</head>
+<body style="font-family: Arial; padding: 40px;">
+    <h2>HOAI 🧠 – Local Booking</h2>
+    <form method="POST">
+        <input name="user_input" placeholder="Was möchtest du?" style="width: 300px;" required>
+        <button type="submit">Senden</button>
+    </form>
+
+    {% if response %}
+        <p><strong>HOAI:</strong> {{ response }}</p>
+    {% endif %}
+</body>
+</html>
